@@ -1,0 +1,3 @@
+[submodule "codex-universal"]
+	path = codex-universal
+	url = https://github.com/openai/codex-universal.git
