@@ -1,0 +1,190 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+import subprocess
+import sys
+import os
+
+try:
+    import argparse
+except ImportError:
+    print("argparse module required.")
+    sys.exit(1)
+
+VERSION = "1.0.1"
+
+USAGE = """Usage:
+  distro-paths [<distro>...]
+  distro-paths (-h | --help)
+  distro-paths --version
+
+If no <distro> is specified, prints all distros.
+
+Special shorthand:
+  "." or --current   resolves to the currently running distro name.
+
+Examples:
+  distro-paths
+  distro-paths .
+  distro-paths Ubuntu-22.04 Debian
+"""
+
+def get_wsl_distro_paths():
+    """
+    Executes:
+      powershell.exe "Get-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Lxss\*' | ConvertTo-Json" |
+      jq -r '.[] | "\(.DistributionName)\t\(.BasePath)"'
+
+    Returns:
+        A dict mapping distro names to BasePaths.
+    """
+    try:
+        proc = subprocess.Popen(
+            [
+                "powershell.exe",
+                "-NoProfile",
+                "-Command",
+                "Get-ItemProperty -Path 'HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Lxss\\*' | ConvertTo-Json"
+            ],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            universal_newlines=True
+        )
+        ps_output, ps_err = proc.communicate()
+
+        if proc.returncode != 0:
+            print("PowerShell returned error code %d" % proc.returncode)
+            print(ps_err)
+            return None
+
+        # Now pass PowerShell JSON output to jq
+        proc2 = subprocess.Popen(
+            [
+                "jq",
+                "-r",
+                '.[] | "\\(.DistributionName)\\t\\(.BasePath)"'
+            ],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            universal_newlines=True
+        )
+        jq_output, jq_err = proc2.communicate(input=ps_output)
+
+        if proc2.returncode != 0:
+            print("jq returned error code %d" % proc2.returncode)
+            print(jq_err)
+            return None
+
+    except Exception as e:
+        print("Error running PowerShell + jq pipeline: %s" % str(e))
+        return None
+
+    distros = {}
+    for line in jq_output.strip().splitlines():
+        parts = line.strip().split("\t")
+        if len(parts) == 2:
+            distro_name = parts[0].strip()
+            base_path = parts[1].strip()
+            distros[distro_name] = base_path
+
+    return distros
+
+
+def get_current_distro_name():
+    """
+    Reads the WSL_DISTRO_NAME environment variable.
+
+    Returns:
+        The name of the current running distro, or None if not set.
+    """
+    return os.environ.get("WSL_DISTRO_NAME")
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description="Display the Windows path(s) of WSL distros.",
+        usage=USAGE,
+        add_help=False
+    )
+
+    parser.add_argument(
+        'distro',
+        nargs='*',
+        help='Name(s) of distro(s) to query. Use "." or --current for the current distro.'
+    )
+
+    parser.add_argument(
+        '-h', '--help',
+        action='store_true',
+        help='Show this help message and exit.'
+    )
+
+    parser.add_argument(
+        '--version',
+        action='store_true',
+        help='Show version and exit.'
+    )
+
+    args, unknown = parser.parse_known_args()
+
+    # emulate docopt short-circuit behavior
+    if args.help:
+        print(USAGE)
+        sys.exit(0)
+
+    if args.version:
+        print("distro-paths %s" % VERSION)
+        sys.exit(0)
+
+    return args
+
+
+def main():
+    args = parse_args()
+
+    distro_paths = get_wsl_distro_paths()
+    if distro_paths is None:
+        print("No WSL distros found or error occurred.")
+        sys.exit(1)
+
+    # resolve "." or --current
+    resolved_args = []
+    for arg in args.distro:
+        if arg == "." or arg == "--current":
+            distro_name = get_current_distro_name()
+            if distro_name:
+                resolved_args.append(distro_name)
+            else:
+                print("WSL_DISTRO_NAME not set. Cannot determine current distro.")
+                sys.exit(1)
+        else:
+            resolved_args.append(arg)
+
+    if len(resolved_args) == 0:
+        # No arguments: print all
+        for distro in sorted(distro_paths.keys()):
+            path = distro_paths[distro]
+            print("Distro: %s" % distro)
+            print("BasePath: %s" % path)
+            print("")
+    elif len(resolved_args) == 1:
+        distro_name = resolved_args[0]
+        if distro_name in distro_paths:
+            print(distro_paths[distro_name])
+        else:
+            print("Distro '%s' not found." % distro_name)
+            sys.exit(1)
+    else:
+        # Multiple distros specified
+        for distro_name in resolved_args:
+            if distro_name in distro_paths:
+                path = distro_paths[distro_name]
+                padded = (distro_name + " " * 30)[:30]
+                print("%s : %s" % (padded, path))
+            else:
+                print("Distro '%s' not found." % distro_name)
+
+
+if __name__ == "__main__":
+    main()
