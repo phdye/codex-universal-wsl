@@ -1,35 +1,36 @@
-# Codex Universal WSL Builder
+# Codex Universal WSL
 
-This repository provides scripts and instructions for building or installing a WSL distribution that mirrors the ChatGPT Codex environment.
+This repository packages the [openai/codex-universal](https://github.com/openai/codex-universal) image into a
+WSL distributable. The `rootfs` directory contains configuration files that
+mirror the environment of the Codex Environment Editor.
 
-A Docker based build script is included for creating a root filesystem tarball from the public [openai/codex-universal](https://github.com/openai/codex-universal) repository.  For convenience on Windows, a separate script imports the latest GitHub release directly using `wsl.exe` from a Cygwin shell.
+## Prerequisites
 
-## Requirements
-
-- Docker (for building the rootfs)
-- Git
-- On Windows: Cygwin with `curl` and access to the `wsl.exe` command
-
-## Building the Rootfs
-
-Run the build script from any Unix environment with Docker installed:
+* Initialize the `codex-universal` submodule:
 
 ```bash
-./build_codex_wsl.sh
+git submodule update --init --depth 1
 ```
 
-This clones `openai/codex-universal` if needed, builds the Docker image, exports a container filesystem, and injects environment initialization files so that the resulting `codex-wsl-rootfs.tar.gz` behaves like the Codex shell.
+The submodule provides the base filesystem used to build the WSL tarball.
 
-## Installing on Windows
+## Building the WSL Distribution
 
-From a Cygwin terminal, execute the installer script which downloads the binary release and uses `wsl.exe` to import the distribution:
+Run the build script to generate a tarball that can be imported with `wsl.exe`:
 
 ```bash
-./create_codex_wsl.sh
+./build-wsl-distro.sh
 ```
 
-By default the distribution is imported as `CodexEnv` under `~/CodexEnv`. Pass `DISTRO_NAME` and `INSTALL_DIR` environment variables to override these paths.
+The script creates `codex-universal-wsl.tar.gz` in the project root.  Files
+under `rootfs/` are overlaid on top of the vanilla
+`openai/codex-universal` filesystem from the submodule, ensuring that any
+custom configuration in this repository becomes part of the resulting WSL
+distro.
 
-## Environment Details
+Import the tarball on Windows using:
 
-Initialization follows the order described in `Codex-Shell-Execution-Order.md`.  Docker `ENV` variables and typical `CODEX_ENV_*` values are written to `/etc/profile.d/codex_env.sh` inside the distribution so they are available whenever the shell starts.
+```powershell
+wsl --import CodexUniversal <install-path> .\codex-universal-wsl.tar.gz
+```
+
