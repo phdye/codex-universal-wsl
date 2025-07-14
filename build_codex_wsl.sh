@@ -13,24 +13,25 @@ ROOTFS_TAR="codex-wsl-rootfs.tar"
 
 # Clone the upstream repository if it doesn't already exist
 if [ ! -d "$REPO_DIR" ]; then
-    git clone "$REPO_URL" "$REPO_DIR"
+    ( set -x && git clone "$REPO_URL" "$REPO_DIR" )
 fi
 
 # Build the Docker image containing the Codex environment
-cd "$REPO_DIR"
-docker build -t "$IMAGE_NAME" .
-cd - >/dev/null
+( set -x && cd "$REPO_DIR" && docker build -t "$IMAGE_NAME" . )
+# cd - >/dev/null
 
 # Create a container from the image and export its filesystem
-CID=$(docker create "$IMAGE_NAME" /bin/bash)
-docker export "$CID" -o "$ROOTFS_TAR"
-docker rm "$CID"
+_create="docker create '$IMAGE_NAME' /bin/bash"
+echo "+ ${_create}"
+CID=$( ${_create} )
+( set =x && docker export "$CID" -o "$ROOTFS_TAR" )
+( set -x && docker rm "$CID" )
 
 # Inject environment variables and setup script sourcing
 TMPDIR=$(mktemp -d)
-tar -xf "$ROOTFS_TAR" -C "$TMPDIR"
-mkdir -p "$TMPDIR/etc/profile.d"
-cat > "$TMPDIR/etc/profile.d/codex_env.sh" <<'EOS'
+( set -x && tar -xf "$ROOTFS_TAR" -C "$TMPDIR" )
+( set -x && mkdir -p "$TMPDIR/etc/profile.d" )
+( set -x && cat > "$TMPDIR/etc/profile.d/codex_env.sh" ) <<'EOS'
 export LANG=${LANG:-C.UTF-8}
 export LC_ALL=${LC_ALL:-C.UTF-8}
 export CODEX_ENV_PYTHON_VERSION=${CODEX_ENV_PYTHON_VERSION:-3.12}
@@ -47,9 +48,9 @@ if [ -f /opt/codex/setup_universal.sh ]; then
 fi
 EOS
 
-tar -C "$TMPDIR" -cf "$ROOTFS_TAR" .
-rm -rf "$TMPDIR"
+( set -x && tar -C "$TMPDIR" -cf "$ROOTFS_TAR" . )
+( set -x && rm -rf "$TMPDIR" )
 
-gzip -f "$ROOTFS_TAR"
+( set -x && gzip -f "$ROOTFS_TAR" )
 
 echo "Created $(pwd)/${ROOTFS_TAR}.gz"
