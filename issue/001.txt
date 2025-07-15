@@ -1,0 +1,121 @@
+Script started on 2025-07-15 07:04:06-04:00 [TERM="screen.xterm-256color" TTY="/dev/pts/17" COLUMNS="106" LINES="34"]
++ cd codex-universal
++ docker build -t codex-universal-wsl .
+[6n[m]0;C:\Program Files\Docker\Docker\resources\bin\docker.exe[?25h[+] Building 0.0s (0/1)                                                              docker:desktop-linux[?25l
+[?25h[?25l[33;1H[+] Building 0.2s (1/2)                                                              docker:desktop-linux[36m
+ => [internal] load build definition from Dockerfile                                                 0.0s[m
+[36m => => transferring dockerfile: 7.11kB                                                               0.0s [m
+ => [internal] load metadata for docker.io/library/ubuntu:24.04                                      0.2s 
+[?25h[?25l[30;1H[+] Building 0.3s (1/2)                                                              docker:desktop-linux[36m
+ => [internal] load build definition from Dockerfile                                                 0.0s
+ => => transferring dockerfile: 7.11kB                                                               0.0s[m
+ => [internal] load metadata for docker.io/library/ubuntu:24.04                                      0.3s
+[?25h[?25l[30;1H[+] Building 0.4s (2/2)                                                              docker:desktop-linux[36m
+ => [internal] load build definition from Dockerfile                                                 0.0s
+ => => transferring dockerfile: 7.11kB                                                               0.0s
+ => [internal] load metadata for docker.io/library/ubuntu:24.04                                      0.3s
+[?25h[m[?25l[30;1H[+] Building 0.5s (21/22)                                                            docker:desktop-linux[36m
+ => [internal] load build definition from Dockerfile                                                 0.0s
+ => => transferring dockerfile: 7.11kB                                                               0.0s
+ => [internal] load metadata for docker.io/library/ubuntu:24.04                                      0.3s
+ => [internal] load .dockerignore                                                                    0.0s[m
+[36m => => transferring context: 2B                                                                      0.0s [m
+[36m => [ 1/17] FROM docker.io/library/ubuntu:24.04@sha256:440dcf6a5640b2ae5c77724e68787a906afb8ddee98b  0.0s [m
+[36m => => resolve docker.io/library/ubuntu:24.04@sha256:440dcf6a5640b2ae5c77724e68787a906afb8ddee98bf8  0.0s [m
+[36m => [internal] load build context                                                                    0.0s [m
+[36m => => transferring context: 73B                                                                     0.0s [m
+[36m => CACHED [ 2/17] RUN apt-get update     && apt-get upgrade -y     && DEBIAN_FRONTEND=noninteracti  0.0s [m
+[36m => CACHED [ 3/17] RUN git -c advice.detachedHead=0 clone --branch v2.5.5 --depth 1 https://github.  0.0s [m
+[36m => CACHED [ 4/17] RUN apt-get update && apt-get install -y pipx     && rm -rf /var/lib/apt/lists/*  0.0s [m
+[36m => CACHED [ 5/17] RUN git -c advice.detachedHead=0 clone --branch v0.40.2 --depth 1 https://github  0.0s [m
+[36m => CACHED [ 6/17] RUN mkdir -p "/root/.bun/bin"     && curl -L --fail "https://github.com/oven-sh/  0.0s [m
+[36m => CACHED [ 7/17] RUN apt-get update && apt-get install -y --no-install-recommends         openjdk  0.0s [m
+[36m => CACHED [ 8/17] RUN mkdir /tmp/swiftly     && cd /tmp/swiftly     && curl -O https://download.sw  0.0s [m
+[36m => CACHED [ 9/17] RUN apt-get update && apt-get install -y --no-install-recommends         ruby-fu  0.0s [m
+[36m => CACHED [10/17] RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs |         sh -s --  0.0s [m
+[36m => CACHED [11/17] RUN mkdir /tmp/go     && cd /tmp/go     && curl -O https://dl.google.com/go/go1.  0.0s [m
+[36m => CACHED [12/17] RUN curl -L --fail https://github.com/bazelbuild/bazelisk/releases/download/v1.2  0.0s [m
+[36m => CACHED [13/17] RUN apt-get update && apt-get install -y --no-install-recommends         git      0.0s [m
+[36m => CACHED [14/17] COPY setup_universal.sh /opt/codex/setup_universal.sh                             0.0s [m
+[36m => CACHED [15/17] RUN chmod +x /opt/codex/setup_universal.sh                                        0.0s [m
+[36m => CACHED [16/17] COPY entrypoint.sh /opt/entrypoint.sh                                             0.0s [m
+[36m => CACHED [17/17] RUN chmod +x /opt/entrypoint.sh                                                   0.0s [m
+ => exporting to image                                                                               0.0s 
+[36m => => exporting layers                                                                              0.0s [m
+[36m => => exporting manifest sha256:42b659b6c6052674d95d956e04b8ba22832c70e5d0ee3f4fe82c890c2a1781de    0.0s [m
+[36m => => exporting config sha256:36bb1d5fa31d607c1039a48471c6c2e570849dc0ecd849b059f588cdfbd54d08      0.0s [m
+ => => exporting attestation manifest sha256:ef469ccec9bee9065f445464a4eec6dbcd5b9cb4d1f0fbe7b00577  0.0s 
+[?25h[?25l[3;1H[+] Building 0.6s (22/22)                                                            docker:desktop-linux[36m
+ => => transferring dockerfile: 7.11kB                                                               0.0s
+ => [internal] load metadata for docker.io/library/ubuntu:24.04                                      0.3s
+ => [internal] load .dockerignore                                                                    0.0s
+ => => transferring context: 2B                                                                      0.0s
+ => [ 1/17] FROM docker.io/library/ubuntu:24.04@sha256:440dcf6a5640b2ae5c77724e68787a906afb8ddee98b  0.0s
+ => => resolve docker.io/library/ubuntu:24.04@sha256:440dcf6a5640b2ae5c77724e68787a906afb8ddee98bf8  0.0s
+ => [internal] load build context                                                                    0.0s
+ => => transferring context: 73B                                                                     0.0s
+ => CACHED [ 2/17] RUN apt-get update     && apt-get upgrade -y     && DEBIAN_FRONTEND=noninteracti  0.0s
+ => CACHED [ 3/17] RUN git -c advice.detachedHead=0 clone --branch v2.5.5 --depth 1 https://github.  0.0s
+ => CACHED [ 4/17] RUN apt-get update && apt-get install -y pipx     && rm -rf /var/lib/apt/lists/*  0.0s
+ => CACHED [ 5/17] RUN git -c advice.detachedHead=0 clone --branch v0.40.2 --depth 1 https://github  0.0s
+ => CACHED [ 6/17] RUN mkdir -p "/root/.bun/bin"     && curl -L --fail "https://github.com/oven-sh/  0.0s
+ => CACHED [ 7/17] RUN apt-get update && apt-get install -y --no-install-recommends         openjdk  0.0s
+ => CACHED [ 8/17] RUN mkdir /tmp/swiftly     && cd /tmp/swiftly     && curl -O https://download.sw  0.0s
+ => CACHED [ 9/17] RUN apt-get update && apt-get install -y --no-install-recommends         ruby-fu  0.0s
+ => CACHED [10/17] RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs |         sh -s --  0.0s
+ => CACHED [11/17] RUN mkdir /tmp/go     && cd /tmp/go     && curl -O https://dl.google.com/go/go1.  0.0s
+ => CACHED [12/17] RUN curl -L --fail https://github.com/bazelbuild/bazelisk/releases/download/v1.2  0.0s
+ => CACHED [13/17] RUN apt-get update && apt-get install -y --no-install-recommends         git      0.0s
+ => CACHED [14/17] COPY setup_universal.sh /opt/codex/setup_universal.sh                             0.0s
+ => CACHED [15/17] RUN chmod +x /opt/codex/setup_universal.sh                                        0.0s
+ => CACHED [16/17] COPY entrypoint.sh /opt/entrypoint.sh                                             0.0s
+ => CACHED [17/17] RUN chmod +x /opt/entrypoint.sh                                                   0.0s
+ => exporting to image                                                                               0.1s
+ => => exporting layers                                                                              0.0s
+ => => exporting manifest sha256:42b659b6c6052674d95d956e04b8ba22832c70e5d0ee3f4fe82c890c2a1781de    0.0s
+ => => exporting config sha256:36bb1d5fa31d607c1039a48471c6c2e570849dc0ecd849b059f588cdfbd54d08      0.0s
+ => => exporting attestation manifest sha256:ef469ccec9bee9065f445464a4eec6dbcd5b9cb4d1f0fbe7b00577  0.0s
+ => => exporting manifest list sha256:899dce0d170fa508739a07ef5d296f216332b56823a35ca1cb01d6d2fef4a  0.0s
+ => => naming to docker.io/library/codex-universal-wsl:latest                                        0.0s[m
+[36m => => unpacking to docker.io/library/codex-universal-wsl:latest                                     0.0s [m
+[36m[?25h[m[?25l[H[+] Building 0.7s (22/22) FINISHED                                                   docker:desktop-linux[36m
+ => [internal] load build definition from Dockerfile                                                 0.0s
+ => => transferring dockerfile: 7.11kB                                                               0.0s
+ => [internal] load metadata for docker.io/library/ubuntu:24.04                                      0.3s
+ => [internal] load .dockerignore                                                                    0.0s
+ => => transferring context: 2B                                                                      0.0s
+ => [ 1/17] FROM docker.io/library/ubuntu:24.04@sha256:440dcf6a5640b2ae5c77724e68787a906afb8ddee98b  0.0s
+ => => resolve docker.io/library/ubuntu:24.04@sha256:440dcf6a5640b2ae5c77724e68787a906afb8ddee98bf8  0.0s
+ => [internal] load build context                                                                    0.0s
+ => => transferring context: 73B                                                                     0.0s
+ => CACHED [ 2/17] RUN apt-get update     && apt-get upgrade -y     && DEBIAN_FRONTEND=noninteracti  0.0s
+ => CACHED [ 3/17] RUN git -c advice.detachedHead=0 clone --branch v2.5.5 --depth 1 https://github.  0.0s
+ => CACHED [ 4/17] RUN apt-get update && apt-get install -y pipx     && rm -rf /var/lib/apt/lists/*  0.0s
+ => CACHED [ 5/17] RUN git -c advice.detachedHead=0 clone --branch v0.40.2 --depth 1 https://github  0.0s
+ => CACHED [ 6/17] RUN mkdir -p "/root/.bun/bin"     && curl -L --fail "https://github.com/oven-sh/  0.0s
+ => CACHED [ 7/17] RUN apt-get update && apt-get install -y --no-install-recommends         openjdk  0.0s
+ => CACHED [ 8/17] RUN mkdir /tmp/swiftly     && cd /tmp/swiftly     && curl -O https://download.sw  0.0s
+ => CACHED [ 9/17] RUN apt-get update && apt-get install -y --no-install-recommends         ruby-fu  0.0s
+ => CACHED [10/17] RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs |         sh -s --  0.0s
+ => CACHED [11/17] RUN mkdir /tmp/go     && cd /tmp/go     && curl -O https://dl.google.com/go/go1.  0.0s
+ => CACHED [12/17] RUN curl -L --fail https://github.com/bazelbuild/bazelisk/releases/download/v1.2  0.0s
+ => CACHED [13/17] RUN apt-get update && apt-get install -y --no-install-recommends         git      0.0s
+ => CACHED [14/17] COPY setup_universal.sh /opt/codex/setup_universal.sh                             0.0s
+ => CACHED [15/17] RUN chmod +x /opt/codex/setup_universal.sh                                        0.0s
+ => CACHED [16/17] COPY entrypoint.sh /opt/entrypoint.sh                                             0.0s
+ => CACHED [17/17] RUN chmod +x /opt/entrypoint.sh                                                   0.0s
+ => exporting to image                                                                               0.1s
+ => => exporting layers                                                                              0.0s
+ => => exporting manifest sha256:42b659b6c6052674d95d956e04b8ba22832c70e5d0ee3f4fe82c890c2a1781de    0.0s
+ => => exporting config sha256:36bb1d5fa31d607c1039a48471c6c2e570849dc0ecd849b059f588cdfbd54d08      0.0s
+ => => exporting attestation manifest sha256:ef469ccec9bee9065f445464a4eec6dbcd5b9cb4d1f0fbe7b00577  0.0s
+ => => exporting manifest list sha256:899dce0d170fa508739a07ef5d296f216332b56823a35ca1cb01d6d2fef4a  0.0s
+ => => naming to docker.io/library/codex-universal-wsl:latest                                        0.0s
+ => => unpacking to docker.io/library/codex-universal-wsl:latest                                     0.0s[m
+[36m[?25h[m
+View build details: ]8;id=30920-1;docker-desktop://dashboard/build/desktop-linux/desktop-linux/s1poagylpvgouxwt4z738hoa0\docker-desktop://dashboard/build/desktop-linux/desktop-linux/s1poagylpvgouxwt4z738hoa0[34;106H]8;;\
++ docker create codex-universal-wsl /bin/bash
+[6n[m]0;C:\Program Files\Docker\Docker\resources\bin\docker.exe[?25hfailed to export container: invalid output path: CreateFile \home\phdyex\my-repos\codex-universal-wsl\arch
+[33;106Hhive: The system cannot find the file specified.
+
+Script done on 2025-07-15 07:04:07-04:00 [COMMAND_EXIT_CODE="1"]
