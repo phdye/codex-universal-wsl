@@ -14,7 +14,7 @@ Options:
 import argparse
 import shutil
 import subprocess
-from pathlib import Path
+import os
 
 VERSION = "1.0"
 
@@ -32,39 +32,39 @@ def parse_args():
 
 def run(cmd, **kwargs):
     print("+", " ".join(cmd))
-    subprocess.run(cmd, check=True, **kwargs)
+    subprocess.check_call(cmd, **kwargs)
 
 
 def main():
     args = parse_args()
     overlay = not args.no_overlay
 
-    ROOT_DIR = Path(__file__).resolve().parent
-    BASE_REPO = ROOT_DIR / "codex-universal"
-    OVERLAY_DIR = ROOT_DIR / "rootfs"
-    OUTPUT_DIR = ROOT_DIR / "build" / "rootfs"
-    TARBALL = ROOT_DIR / "codex-universal-wsl.tar.gz"
+    ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+    BASE_REPO = os.path.join(ROOT_DIR, "codex-universal")
+    OVERLAY_DIR = os.path.join(ROOT_DIR, "rootfs")
+    OUTPUT_DIR = os.path.join(ROOT_DIR, "build", "rootfs")
+    TARBALL = os.path.join(ROOT_DIR, "codex-universal-wsl.tar.gz")
 
-    if not BASE_REPO.exists():
+    if not os.path.exists(BASE_REPO):
         print("codex-universal submodule not found. Run 'git submodule update --init --depth 1'", flush=True)
         raise SystemExit(1)
 
-    if OUTPUT_DIR.exists():
+    if os.path.exists(OUTPUT_DIR):
         shutil.rmtree(OUTPUT_DIR)
-    OUTPUT_DIR.mkdir(parents=True)
+    os.makedirs(OUTPUT_DIR)
 
-    base_fs = BASE_REPO / "rootfs"
-    if base_fs.is_dir():
-        run(["cp", "-a", str(base_fs / "."), str(OUTPUT_DIR)])
+    base_fs = os.path.join(BASE_REPO, "rootfs")
+    if os.path.isdir(base_fs):
+        run(["cp", "-a", os.path.join(base_fs, "."), OUTPUT_DIR])
     else:
-        print(f"Base repo missing rootfs: {base_fs}")
+        print("Base repo missing rootfs: %s" % base_fs)
         raise SystemExit(1)
 
     if overlay:
-        run(["cp", "-a", f"{OVERLAY_DIR}/.", str(OUTPUT_DIR)])
+        run(["cp", "-a", "%s/." % OVERLAY_DIR, OUTPUT_DIR])
 
-    run(["tar", "--numeric-owner", "-C", str(OUTPUT_DIR), "-czf", str(TARBALL), "."])
-    print(f"WSL distro created: {TARBALL}")
+    run(["tar", "--numeric-owner", "-C", OUTPUT_DIR, "-czf", TARBALL, "."])
+    print("WSL distro created: %s" % TARBALL)
 
 
 if __name__ == "__main__":

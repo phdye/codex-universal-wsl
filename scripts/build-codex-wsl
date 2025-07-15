@@ -14,7 +14,7 @@ Options:
 import argparse
 import shutil
 import subprocess
-from pathlib import Path
+import os
 
 VERSION = "1.0"
 
@@ -32,7 +32,7 @@ def parse_args():
 
 def run(cmd, **kwargs):
     print("+", " ".join(cmd))
-    subprocess.run(cmd, check=True, **kwargs)
+    subprocess.check_call(cmd, **kwargs)
 
 
 def main():
@@ -41,36 +41,37 @@ def main():
 
     REPO_URL = "https://github.com/openai/codex-universal.git"
     REPO_NAME = "codex-universal"
-    REPO_DIR = Path(REPO_NAME)
+    REPO_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), REPO_NAME)
     IMAGE_NAME = "codex-universal-wsl"
 
-    ROOT_DIR = Path(__file__).resolve().parent
-    ARCHIVE_DIR = ROOT_DIR / "archive"
-    BASE_ROOTFS_TAR = ARCHIVE_DIR / f"{REPO_NAME}.rootfs.tar"
-    BASE_REPO = ROOT_DIR / REPO_NAME
-    OVERLAY_DIR = ROOT_DIR / "rootfs"
-    OUTPUT_DIR = ROOT_DIR / "build" / "rootfs"
-    ROOTFS_TAR = f"{IMAGE_NAME}.tar.xz"
+    ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+    ARCHIVE_DIR = os.path.join(ROOT_DIR, "archive")
+    BASE_ROOTFS_TAR = os.path.join(ARCHIVE_DIR, "%s.rootfs.tar" % REPO_NAME)
+    BASE_REPO = os.path.join(ROOT_DIR, REPO_NAME)
+    OVERLAY_DIR = os.path.join(ROOT_DIR, "rootfs")
+    OUTPUT_DIR = os.path.join(ROOT_DIR, "build", "rootfs")
+    ROOTFS_TAR = "%s.tar.xz" % IMAGE_NAME
 
-    ARCHIVE_DIR.mkdir(parents=True, exist_ok=True)
-    if OUTPUT_DIR.exists():
+    os.makedirs(ARCHIVE_DIR, exist_ok=True)
+    if os.path.exists(OUTPUT_DIR):
         shutil.rmtree(OUTPUT_DIR)
-    OUTPUT_DIR.mkdir(parents=True)
+    os.makedirs(OUTPUT_DIR)
 
-    if not REPO_DIR.exists():
+    if not os.path.exists(REPO_DIR):
         run(["git", "submodule", "update", "--init", "--depth", "1"])
 
-    run(["docker", "build", "-t", IMAGE_NAME, "."], cwd=str(REPO_DIR))
+    run(["docker", "build", "-t", IMAGE_NAME, "."], cwd=REPO_DIR)
 
     cid = subprocess.check_output(["docker", "create", IMAGE_NAME, "/bin/bash"]).decode().strip()
-    run(["docker", "export", cid, "-o", str(BASE_ROOTFS_TAR)])
+    run(["docker", "export", cid, "-o", BASE_ROOTFS_TAR])
     run(["docker", "rm", cid])
 
-    run(["tar", "-xf", str(BASE_ROOTFS_TAR), "-C", str(OUTPUT_DIR)])
-    (OUTPUT_DIR / "etc" / "profile.d").mkdir(parents=True, exist_ok=True)
-    env_file = OUTPUT_DIR / "etc" / "profile.d" / "codex_env.sh"
-    env_file.write_text(
-        """export LANG=${LANG:-C.UTF-8}
+    run(["tar", "-xf", BASE_ROOTFS_TAR, "-C", OUTPUT_DIR])
+    os.makedirs(os.path.join(OUTPUT_DIR, "etc", "profile.d"), exist_ok=True)
+    env_file = os.path.join(OUTPUT_DIR, "etc", "profile.d", "codex_env.sh")
+    with open(env_file, "w") as f:
+        f.write(
+            """export LANG=${LANG:-C.UTF-8}
 export LC_ALL=${LC_ALL:-C.UTF-8}
 export CODEX_ENV_PYTHON_VERSION=${CODEX_ENV_PYTHON_VERSION:-3.12}
 export CODEX_ENV_NODE_VERSION=${CODEX_ENV_NODE_VERSION:-20}
@@ -85,13 +86,13 @@ if [ -f /opt/codex/setup_universal.sh ]; then
     source /opt/codex/setup_universal.sh
 fi
 """
-    )
+        )
 
     if overlay:
-        run(["cp", "-a", f"{OVERLAY_DIR}/.", str(OUTPUT_DIR)])
+        run(["cp", "-a", "%s/." % OVERLAY_DIR, OUTPUT_DIR])
 
-    run(["tar", "-C", str(OUTPUT_DIR), "-cfJ", ROOTFS_TAR, "."])
-    print(f"Created {ROOT_DIR / ROOTFS_TAR}")
+    run(["tar", "-C", OUTPUT_DIR, "-cfJ", ROOTFS_TAR, "."])
+    print("Created %s" % os.path.join(ROOT_DIR, ROOTFS_TAR))
 
 
 if __name__ == "__main__":
