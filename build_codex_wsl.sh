@@ -19,6 +19,10 @@ OVERLAY_DIR="$ROOT_DIR/rootfs"
 OUTPUT_DIR="$ROOT_DIR/build/rootfs"
 ROOTFS_TAR="${IMAGE_NAME}.tar.xz"
 
+# Ensure required directories exist
+( set -x && mkdir -p "$ARCHIVE_DIR" )
+( set -x && rm -rf "$OUTPUT_DIR" && mkdir -p "$OUTPUT_DIR" )
+
 _overlay=yes
 if [ $# -gt 0 ] ; then
     if [ "$1" == "--no-overlay" ] ; then
@@ -41,7 +45,7 @@ fi
 _create="docker create $IMAGE_NAME /bin/bash"
 echo "+ ${_create}"
 CID=$( ${_create} )
-( set =x && docker export "$CID" -o "$BASE_ROOTFS_TAR" )
+( set -x && docker export "$CID" -o "$BASE_ROOTFS_TAR" )
 ( set -x && docker rm "$CID" )
 
 # Inject environment variables and setup script sourcing
