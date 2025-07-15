@@ -15,7 +15,7 @@ Options:
 """
 import argparse
 import subprocess
-from pathlib import Path
+import os
 
 VERSION = "1.0"
 
@@ -35,28 +35,28 @@ def parse_args():
 
 def run(cmd, **kwargs):
     print("+", " ".join(cmd))
-    subprocess.run(cmd, check=True, **kwargs)
+    subprocess.check_call(cmd, **kwargs)
 
 
 def main():
     args = parse_args()
-    tarball = Path("codex-wsl-rootfs.tar.gz")
-    install_dir = Path(args.distro_base) / args.distro_name
+    tarball = os.path.join(os.getcwd(), "codex-wsl-rootfs.tar.gz")
+    install_dir = os.path.join(args.distro_base, args.distro_name)
 
-    if not tarball.exists():
-        run(["curl", "-L", "-o", str(tarball), args.release_url])
+    if not os.path.exists(tarball):
+        run(["curl", "-L", "-o", tarball, args.release_url])
 
-    run(["mkdir", "-p", str(install_dir)])
+    run(["mkdir", "-p", install_dir])
     run([
         "wsl.exe",
         "--import",
         args.distro_name,
-        str(install_dir),
-        str(tarball),
+        install_dir,
+        tarball,
         "--version",
         "2",
     ])
-    print(f"Imported WSL distribution '{args.distro_name}'")
+    print("Imported WSL distribution '%s'" % args.distro_name)
 
 
 if __name__ == "__main__":
