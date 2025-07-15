@@ -20,7 +20,9 @@ DISTRO_BASE="/mnt/c/wsl"
 INSTALL_DIR="${DISTRO_BASE}/${DISTRO_NAME}"
 
 # Download the release tarball
-# ( set -x && curl -L -o "$TARBALL" "$RELEASE_URL" )
+if [ ! -f "$TARBALL" ] ; then
+     ( set -x && curl -L -o "$TARBALL" "$RELEASE_URL" )
+fi
 
 # Import the distribution via wsl.exe
 ( set -x && mkdir -p "$INSTALL_DIR" )
