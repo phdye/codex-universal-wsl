@@ -5,9 +5,12 @@
 
 set -euo pipefail
 
-_rootfs=yes
-if [ "$1" == "--no-rootfs" ] ; then
-    _rootfs=
+_overlay=yes
+if [ $# -gt 0 ] ; then
+    if [ "$1" == "--no-overlay" ] ; then
+        _overlay=
+        shift
+    fi
 fi
 
 ROOT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -25,13 +28,18 @@ fi
 ( set -x && rm -rf "$OUTPUT_DIR" && mkdir -p "$OUTPUT_DIR" )
 
 # Copy base filesystem
-if [ -d "$BASE_REPO/rootfs" ]; then
+base_fs="$BASE_REPO/rootfs"
+if [ -d ${base_fs} ]; then
     ( set -x && cp -a "$BASE_REPO/rootfs/." "$OUTPUT_DIR/" )
+else
+    echo "Base repo missing rootfs:  ${base_fs}"
+    exit 1
 fi
 
-# # Overlay custom rootfs files
-if 
-# ( set -x && cp -a "$OVERLAY_DIR/." "$OUTPUT_DIR/" )
+# Overlay custom rootfs files
+if [ -n "${_overlay}" ] ; then
+    ( set -x && cp -a "$OVERLAY_DIR/." "$OUTPUT_DIR/" )
+fi
 
 # Create tarball
 ( set -x && rm -f "$TARBALL" && tar --numeric-owner -C "$OUTPUT_DIR" -czf "$TARBALL" . )
