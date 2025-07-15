@@ -5,6 +5,11 @@
 
 set -euo pipefail
 
+_rootfs=yes
+if [ "$1" == "--no-rootfs" ] ; then
+    _rootfs=
+fi
+
 ROOT_DIR="$(cd "$(dirname "$0")" && pwd)"
 BASE_REPO="$ROOT_DIR/codex-universal"
 OVERLAY_DIR="$ROOT_DIR/rootfs"
@@ -17,19 +22,18 @@ if [ ! -d "$BASE_REPO" ]; then
 fi
 
 # Prepare output directory
-rm -rf "$OUTPUT_DIR"
-mkdir -p "$OUTPUT_DIR"
+( set -x && rm -rf "$OUTPUT_DIR" && mkdir -p "$OUTPUT_DIR" )
 
 # Copy base filesystem
 if [ -d "$BASE_REPO/rootfs" ]; then
-    cp -a "$BASE_REPO/rootfs/." "$OUTPUT_DIR/"
+    ( set -x && cp -a "$BASE_REPO/rootfs/." "$OUTPUT_DIR/" )
 fi
 
-# Overlay custom rootfs files
-cp -a "$OVERLAY_DIR/." "$OUTPUT_DIR/"
+# # Overlay custom rootfs files
+if 
+# ( set -x && cp -a "$OVERLAY_DIR/." "$OUTPUT_DIR/" )
 
 # Create tarball
-rm -f "$TARBALL"
-tar --numeric-owner -C "$OUTPUT_DIR" -czf "$TARBALL" .
+( set -x && rm -f "$TARBALL" && tar --numeric-owner -C "$OUTPUT_DIR" -czf "$TARBALL" . )
 
 echo "WSL distro created: $TARBALL"
